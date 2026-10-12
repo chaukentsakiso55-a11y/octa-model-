@@ -40,13 +40,10 @@ def evaluate(model, data, cfg, batch_size, eval_batches, device):
     model.eval()
     losses = []
     for _ in range(eval_batches):
-        x, y = batch_from(data, cfg.context_length, batch_size, device)
-        # model's shifted loss expects labels aligned with input sequence.
-        # Include one extra input token to predict next token at each position.
-        tokens = torch.cat((x, y[:, -1:]), dim=1)
-        if tokens.shape[1] > cfg.context_length:
-            tokens = tokens[:, :cfg.context_length]
-        output = model(tokens, labels=tokens)
+        x, _ = batch_from(data, cfg.context_length, batch_size, device)
+        # The model internally shifts labels by one position.
+        # Using x directly avoids an extra token and keeps sequence length bounded.
+        output = model(x, labels=x)
         losses.append(output["loss"].item())
     model.train()
     return sum(losses) / len(losses)
