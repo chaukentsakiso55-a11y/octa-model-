@@ -4,6 +4,7 @@ from fastapi import FastAPI, Header, HTTPException
 from app.schemas import ChatRequest
 from app.security import require_api_key
 from app.research import SearchRequest, search_web
+from app.agent import ResearchAnswerRequest, research_answer
 
 app = FastAPI(title="OCTA Cloud API", version="0.1.0")
 MODEL = os.getenv("OCTA_MODEL", "Qwen/Qwen3-8B")
@@ -35,3 +36,8 @@ async def chat(payload: ChatRequest, authorization: str | None = Header(default=
 async def research(request: SearchRequest, authorization: str | None = Header(default=None)):
     require_api_key(authorization)
     return await search_web(request)
+
+@app.post("/v1/research/answer")
+async def answer_with_sources(request: ResearchAnswerRequest, authorization: str | None = Header(default=None)):
+    require_api_key(authorization)
+    return await research_answer(request)
