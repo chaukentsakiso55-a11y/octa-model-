@@ -6,6 +6,7 @@ from app.security import require_api_key
 from app.research import SearchRequest, search_web
 from app.agent import ResearchAnswerRequest, research_answer
 from app.multimodal import ImageRequest, VisionRequest, VideoScriptRequest, generate_image, understand_image, create_video_script
+from app.video import VideoRenderRequest, start_render, render_status
 
 app = FastAPI(title="OCTA Cloud API", version="0.1.0")
 MODEL = os.getenv("OCTA_MODEL", "Qwen/Qwen3-8B")
@@ -57,3 +58,13 @@ async def vision(request: VisionRequest, authorization: str | None = Header(defa
 async def video_script(request: VideoScriptRequest, authorization: str | None = Header(default=None)):
     require_api_key(authorization)
     return await create_video_script(request)
+
+@app.post("/v1/video/generations")
+async def video_generate(request: VideoRenderRequest, authorization: str | None = Header(default=None)):
+    require_api_key(authorization)
+    return await start_render(request)
+
+@app.get("/v1/video/generations/{job_id}")
+async def video_status(job_id: str, authorization: str | None = Header(default=None)):
+    require_api_key(authorization)
+    return await render_status(job_id)
