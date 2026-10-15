@@ -21,7 +21,7 @@ class VideoScriptRequest(BaseModel):
 async def invoke_provider(endpoint_env: str, key_env: str, path: str, payload: dict) -> dict:
     endpoint = os.getenv(endpoint_env, "").rstrip("/")
     key = os.getenv(key_env, "")
-    if not endpoint or not endpoint.startswith("https://") or not key:
+    if not endpoint or not (endpoint.startswith("https://") or (endpoint_env == "OCTA_INFERENCE_URL" and endpoint.startswith("http://inference:"))) or not key:
         raise HTTPException(status_code=503, detail="Multimodal provider is not configured with HTTPS and credentials")
     try:
         async with httpx.AsyncClient(timeout=120.0, follow_redirects=False) as client:
