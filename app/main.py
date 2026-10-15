@@ -3,6 +3,7 @@ import httpx
 from fastapi import FastAPI, Header, HTTPException
 from app.schemas import ChatRequest
 from app.security import require_api_key
+from app.research import SearchRequest, search_web
 
 app = FastAPI(title="OCTA Cloud API", version="0.1.0")
 MODEL = os.getenv("OCTA_MODEL", "Qwen/Qwen3-8B")
@@ -29,3 +30,8 @@ async def chat(payload: ChatRequest, authorization: str | None = Header(default=
         raise HTTPException(504, "Inference timed out")
     except (httpx.HTTPError, ValueError):
         raise HTTPException(502, "Inference service unavailable")
+
+@app.post("/v1/research/search")
+async def research(request: SearchRequest, authorization: str | None = Header(default=None)):
+    require_api_key(authorization)
+    return await search_web(request)
