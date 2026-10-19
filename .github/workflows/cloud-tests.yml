@@ -17,4 +17,4 @@ jobs:
       - name: Compile Python modules
         run: python -m compileall -q app octa tests
       - name: Run API tests
-        run: python -m pytest tests -q
+        run: python -m pytest tests -q --tb=short -ra
